@@ -25,15 +25,18 @@
 
 class Client {
 public:
-    Client();
+    Client(char* ip, int port) : ip(ip), port(port){};
     Client(const Client& orig);
-    virtual ~Client();
+    virtual ~Client();    
     
-    int openConnection(int ip, int port);
+    int openConnection(char* ip, int port);
     int closeConnection();
     int send();
+    void printMenu();
 private:
-    int socketID;
+    char* ip;
+    int port;
+     int socketID;
      char buffer[BUF];
      struct sockaddr_in address;
      int size;

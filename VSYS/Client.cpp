@@ -13,8 +13,7 @@
 
 #include "Client.h"
 
-Client::Client() {
-}
+
 
 Client::Client(const Client& orig) {
 }
@@ -22,14 +21,39 @@ Client::Client(const Client& orig) {
 Client::~Client() {
 }
 
-int Client::openConnection(int ip, int port) {
-    if((socketID = socket(AF_INET, SOCK_STREAM, 0)) == -1){
-       return EXIT_FAILURE;
+int Client::openConnection(char* ip, int port) {
+    if ((socketID = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+        return EXIT_FAILURE;
     }
-    memset(&address,0,sizeof(address));
+    memset(&address, 0, sizeof (address));
     address.sin_family = AF_INET;
-  address.sin_port = htons (port);
-  inet_aton (ip, &address.sin_addr);
-    
+    address.sin_port = htons(port);
+    inet_aton(ip, &address.sin_addr);
+    if (connect(socketID, (struct sockaddr *) &address, sizeof (address)) != 0) {
+        perror("Connect error - no server available");
+        return EXIT_FAILURE;
+    }
+    printf("Connection with server (%s) established\n", inet_ntoa(address.sin_addr));
+    size = recv(socketID, buffer, BUF - 1, 0);
+    if (size > 0) {
+        buffer[size] = '\0';
+        printf("%s", buffer);
+    }
+
+    return EXIT_SUCCESS;
+
 }
+
+int Client::send() {
+
+}
+
+
+int Client::closeConnection() {
+     close (socketID);
+     std::cout<<"Connection gets closed...";
+    return EXIT_SUCCESS;
+}
+
+
 
