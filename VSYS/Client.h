@@ -10,9 +10,18 @@
  *
  * Created on 4. Oktober 2016, 15:53
  */
-
 #ifndef CLIENT_H
 #define CLIENT_H
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <iostream>
+#define BUF 1024
 
 class Client {
 public:
@@ -20,8 +29,14 @@ public:
     Client(const Client& orig);
     virtual ~Client();
     
-    void openConnection();
+    int openConnection(int ip, int port);
+    int closeConnection();
+    int send();
 private:
+    int socketID;
+     char buffer[BUF];
+     struct sockaddr_in address;
+     int size;
 
 };
 
