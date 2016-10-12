@@ -21,25 +21,28 @@
 #include <stdio.h>
 #include <string.h>
 #include <iostream>
+#include <signal.h>
 #define BUF 1024
 
 class Client {
 public:
-    Client(char* ip, int port) : ip(ip), port(port){};
+    Client();
     Client(const Client& orig);
     virtual ~Client();    
-    
+    static void sighandler(int signum);
     int openConnection(char* ip, int port);
-    int closeConnection();
+    void closeConnection();
     int send();
     void printMenu();
+    void onExit();
+    
 private:
     char* ip;
     int port;
-     int socketID;
-     char buffer[BUF];
-     struct sockaddr_in address;
-     int size;
+    int socketID  ;
+    char buffer[BUF];
+    struct sockaddr_in address;
+    int size;
 
 };
 
