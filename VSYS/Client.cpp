@@ -13,7 +13,9 @@
 
 #include "Client.h"
 
+Client::Client() {
 
+}
 
 Client::Client(const Client& orig) {
 }
@@ -48,11 +50,33 @@ int Client::send() {
 
 }
 
+void Client::printMenu() {
+    std::cout << "Welcome. You have the following options available: \n";
+    std::cout << "List \nGet \nPut \nQuit\n";
+}
 
-int Client::closeConnection() {
-     close (socketID);
-     std::cout<<"Connection gets closed...";
-    return EXIT_SUCCESS;
+void Client::listenToInput() {
+    std::string input, param;
+    while (input != "quit") {
+        std::cin >> input;
+        getline(std::cin, param);
+        std::transform(input.begin(), input.end(), input.begin(), ::tolower);
+        switch (input) {
+            case 'l': ;
+            case 'g':;
+            case 'p':;
+            case 'q':;
+            case 'h':;
+            default:;
+        }
+
+    }
+}
+
+void Client::closeConnection() {
+    close(socketID);
+    std::cout << "Connection gets closed...";
+    //return EXIT_SUCCESS;
 }
 
 
