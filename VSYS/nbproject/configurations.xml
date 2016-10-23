@@ -4,6 +4,8 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
+      <itemPath>ClientDummy.h</itemPath>
+      <itemPath>Server.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
                    displayName="Resource Files"
@@ -12,7 +14,8 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
-      <itemPath>main.cpp</itemPath>
+      <itemPath>myserver_original.cpp</itemPath>
+      <itemPath>servermain.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"
@@ -35,8 +38,17 @@
         <rebuildPropChanged>false</rebuildPropChanged>
       </toolsSet>
       <compileType>
+        <ccTool>
+          <standard>8</standard>
+        </ccTool>
       </compileType>
-      <item path="main.cpp" ex="false" tool="1" flavor2="0">
+      <item path="ClientDummy.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Server.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="myserver_original.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="servermain.cpp" ex="false" tool="1" flavor2="0">
       </item>
     </conf>
     <conf name="Release" type="1">
@@ -59,7 +71,13 @@
           <developmentMode>5</developmentMode>
         </asmTool>
       </compileType>
-      <item path="main.cpp" ex="false" tool="1" flavor2="0">
+      <item path="ClientDummy.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Server.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="myserver_original.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="servermain.cpp" ex="false" tool="1" flavor2="0">
       </item>
     </conf>
   </confs>
