@@ -12,6 +12,7 @@
  */
 
 #include "Client.h"
+using namespace std;
 
 Client::Client() {
 
@@ -36,13 +37,9 @@ int Client::openConnection(char* ip, int port) {
         return EXIT_FAILURE;
     }
     printf("Connection with server (%s) established\n", inet_ntoa(address.sin_addr));
-   
+
 
     return EXIT_SUCCESS;
-
-}
-
-int Client::send() {
 
 }
 
@@ -55,16 +52,15 @@ void Client::listenToInput() {
     std::string input, param;
     while (1) {
         std::cin >> input;
-        for (int i = 0 ; i < input.size() ; ++i)
-    {
-        input[i] = tolower(input[i]);
-    }
+        for (int i = 0; i < input.size(); ++i) {
+            input[i] = tolower(input[i]);
+        }
         switch (input[0]) {
             case 'l':;
             case 'g':;
-            case 'p':;
+            case 'p': ;
             case 'q': return;
-            case 'h': ;
+            case 'h':;
             default:;
         }
 
@@ -76,6 +72,44 @@ void Client::closeConnection() {
     std::cout << "Connection gets closed...";
     //return EXIT_SUCCESS;
 }
+
+void Client::get(std::string name) {
+
+}
+
+void Client::list() {
+
+}
+
+void Client::put(char * filename) {
+    std::ifstream toBeSentFile;
+    toBeSentFile.open(filename);
+
+    int bytesRead; // how many we have left to send
+    int bytesSent;
+    char fullbuffer[BUF + sizeof (int32_t)];
+    char* buffer = fullbuffer + sizeof (int32_t) / sizeof(char*);
+    fullbuffer[0] = (int32_t)4;
+    int32_t bytesReceived;
+
+    while ((bytesRead = toBeSentFile.readsome(buffer, BUF)) > 0) {
+        
+        bytesSent = send(socketID, fullbuffer, bytesRead, 0);
+        if (bytesSent == -1) {
+            break;
+        }
+        recv(socketID, &bytesReceived, sizeof (int32_t), 0);
+        if (bytesSent - bytesReceived != 0) {
+            toBeSentFile.close();
+            return;
+        }
+    }
+    fullbuffer[0] = (int32_t)5;
+    send(socketID, fullbuffer, sizeof(int32_t), 0);
+    toBeSentFile.close();
+}
+
+
 
 
 
