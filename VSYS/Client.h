@@ -18,11 +18,14 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <cstdio>
 #include <stdio.h>
-#include <string.h>
+#include <string>
+#include <cstring>
 #include <iostream>
 #include <signal.h>
 #include <algorithm>
+#include <fstream>
 #define BUF 1024
 
 class Client {
@@ -33,18 +36,19 @@ public:
     static void sighandler(int signum);
     int openConnection(char* ip, int port);
     void closeConnection();
-    int send();
     void printMenu();
     void onExit();
     void listenToInput();
 private:
     char* ip;
     int port;
-    int socketID  ;
+    int socketID;
     char buffer[BUF];
     struct sockaddr_in address;
     int size;
-
+    void list();
+    void get(std::string name);
+    void put(char * filename);//param?
 };
 
 #endif /* CLIENT_H */
