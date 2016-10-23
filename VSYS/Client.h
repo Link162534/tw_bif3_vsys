@@ -22,6 +22,7 @@
 #include <string.h>
 #include <iostream>
 #include <signal.h>
+#include <algorithm>
 #define BUF 1024
 
 class Client {
@@ -35,7 +36,7 @@ public:
     int send();
     void printMenu();
     void onExit();
-    
+    void listenToInput();
 private:
     char* ip;
     int port;

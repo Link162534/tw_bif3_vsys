@@ -10,12 +10,22 @@ using namespace std;
 /*
  * 
  */
+Client* client;
+
+void sigHandle(int signum){
+    client->closeConnection();
+}
+
+
 int main(int argc, char** argv) {
-    
-   // signal(SIGINT, intHandler);
+     //signal(SIGINT, sighandler);
+    client = new Client();
     char* ip = argv[1];
+        client->printMenu();
+
     int port = atoi(argv[2]);
-    Client* client = new Client(ip, port);
+    client->openConnection(ip, port);
+    signal(SIGINT, sigHandle);
     return 0;
 }
 
