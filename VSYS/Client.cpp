@@ -36,11 +36,7 @@ int Client::openConnection(char* ip, int port) {
         return EXIT_FAILURE;
     }
     printf("Connection with server (%s) established\n", inet_ntoa(address.sin_addr));
-    size = recv(socketID, buffer, BUF - 1, 0);
-    if (size > 0) {
-        buffer[size] = '\0';
-        printf("%s", buffer);
-    }
+   
 
     return EXIT_SUCCESS;
 
@@ -57,16 +53,18 @@ void Client::printMenu() {
 
 void Client::listenToInput() {
     std::string input, param;
-    while (input != "quit") {
+    while (1) {
         std::cin >> input;
-        getline(std::cin, param);
-        std::transform(input.begin(), input.end(), input.begin(), ::tolower);
-        switch (input) {
-            case 'l': ;
+        for (int i = 0 ; i < input.size() ; ++i)
+    {
+        input[i] = tolower(input[i]);
+    }
+        switch (input[0]) {
+            case 'l':;
             case 'g':;
             case 'p':;
-            case 'q':;
-            case 'h':;
+            case 'q': return;
+            case 'h': ;
             default:;
         }
 
