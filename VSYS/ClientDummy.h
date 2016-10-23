@@ -17,7 +17,7 @@
 #include <cstring>
 #include <string>
 #include <cstdio>
-#define BUF 1024 
+#define BUF 64 
 
 class ClientDummy {
 public:
@@ -49,9 +49,10 @@ public:
                 perror("recv error");
                 return EXIT_FAILURE;
             }
-            if (strncmp(messageBuffer, "quit", 4) != 0)
+            if (strncmp(messageBuffer, "quit", 4) == 0)
                 running = false;
         }
+        close(clientSocket);
     }
 
     int stop() {

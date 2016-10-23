@@ -19,6 +19,7 @@
 #include <string>
 #include <cstring>
 #include <vector>
+#include <thread>
 #include "ClientDummy.h"
 
 class Server {
@@ -67,12 +68,12 @@ private:
     void waitForClient() {
         while (running) {
             printf("Waiting for connections...\n");
-            
+
             struct sockaddr_in clientAddress;
             int clientSocket = accept(clientListenerSocket, (struct sockaddr *) &clientAddress, &addressLength);
-            
             ClientDummy dummy(clientAddress, clientSocket);
             clientList.push_back(dummy);
+            std::thread t(&ClientDummy::start, dummy);
             dummy.start();
         }
     }

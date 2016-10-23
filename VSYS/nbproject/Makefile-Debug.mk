@@ -43,8 +43,8 @@ OBJECTFILES= \
 CFLAGS=
 
 # CC Compiler Flags
-CCFLAGS=
-CXXFLAGS=
+CCFLAGS=-pthread
+CXXFLAGS=-pthread
 
 # Fortran Compiler Flags
 FFLAGS=
@@ -61,7 +61,7 @@ LDLIBSOPTIONS=
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/vsys: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
-	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/vsys ${OBJECTFILES} ${LDLIBSOPTIONS}
+	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/vsys ${OBJECTFILES} ${LDLIBSOPTIONS} -lpthread
 
 ${OBJECTDIR}/myserver_original.o: myserver_original.cpp 
 	${MKDIR} -p ${OBJECTDIR}

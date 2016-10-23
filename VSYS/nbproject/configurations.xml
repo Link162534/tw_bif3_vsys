@@ -40,7 +40,11 @@
       <compileType>
         <ccTool>
           <standard>8</standard>
+          <commandLine>-pthread</commandLine>
         </ccTool>
+        <linkerTool>
+          <commandLine>-lpthread</commandLine>
+        </linkerTool>
       </compileType>
       <item path="ClientDummy.h" ex="false" tool="3" flavor2="0">
       </item>
