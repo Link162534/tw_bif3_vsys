@@ -14,6 +14,8 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
+      <itemPath>ClientDummy.cpp</itemPath>
+      <itemPath>Server.cpp</itemPath>
       <itemPath>myserver_original.cpp</itemPath>
       <itemPath>servermain.cpp</itemPath>
     </logicalFolder>
@@ -46,7 +48,11 @@
           <commandLine>-lpthread</commandLine>
         </linkerTool>
       </compileType>
+      <item path="ClientDummy.cpp" ex="false" tool="1" flavor2="0">
+      </item>
       <item path="ClientDummy.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Server.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Server.h" ex="false" tool="3" flavor2="0">
       </item>
@@ -75,7 +81,11 @@
           <developmentMode>5</developmentMode>
         </asmTool>
       </compileType>
+      <item path="ClientDummy.cpp" ex="false" tool="1" flavor2="0">
+      </item>
       <item path="ClientDummy.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Server.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Server.h" ex="false" tool="3" flavor2="0">
       </item>

@@ -1,72 +1,99 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/* 
- * File:   ClientDummy.h
- * Author: link
- *
- * Created on October 4, 2016, 4:56 PM
- */
-
 #ifndef CLIENTDUMMY_H
 #define CLIENTDUMMY_H
 
 #include <cstring>
 #include <string>
+#include <cstring>
 #include <cstdio>
-#define BUF 64 
+#include <fstream>
+#include <arpa/inet.h>
+#define BUF 1024
 
+
+class Server;
 class ClientDummy {
 public:
 
-    ClientDummy(struct sockaddr_in clientAddress, int clientSocket) {
-        this->clientAddress = clientAddress;
-        this->clientSocket = clientSocket;
-    }
+    ClientDummy(Server * server, struct sockaddr_in clientAddress, int clientSocket);
 
-    virtual ~ClientDummy() {
-    }
+    virtual ~ClientDummy();
+    
+    int start();
 
-    int start() {
-        running = true;
-        if (clientSocket > 0) {
-            printf("Client connected from %s:%d...\n", inet_ntoa(clientAddress.sin_addr), ntohs(clientAddress.sin_port));
-            strcpy(messageBuffer, "Welcome to myserver, Please enter your command:\n");
-            send(clientSocket, messageBuffer, strlen(messageBuffer), 0);
-        }
-        while (running) {
-            size = recv(clientSocket, messageBuffer, BUF - 1, 0);
-            if (size > 0) {
-                messageBuffer[size] = '\0';
-                printf("Message received: %s\n", messageBuffer);
-            } else if (size == 0) {
-                printf("Client closed remote socket\n");
-                break;
-            } else {
-                perror("recv error");
-                return EXIT_FAILURE;
-            }
-            if (strncmp(messageBuffer, "quit", 4) == 0)
-                running = false;
-        }
-        close(clientSocket);
-    }
-
-    int stop() {
-        running = false;
-        close(clientSocket);
-    }
+    int stop();
 
 private:
     bool running = false;
     int clientSocket;
     int size;
-    char messageBuffer[BUF];
+    char buffer[BUF];
+    char * downloadFolder;
     struct sockaddr_in clientAddress;
+    Server * server;
+
+    /*void sendFile(std::string filename) {
+        std::ifstream toSendFile;
+        
+        //FEHLER WENN FILE NICHT EXISITIERT
+        toSendFile.open(downloadFolder + filename);
+
+        int bytesRead; 
+        int bytesSent;
+        char fullbuffer[BUF + 1];
+        char* buffer = fullbuffer + 1;
+        int filesize = getFileSize(filename);
+        fullbuffer[0] = 2;
+        fullbuffer[1] = '\0';
+        strcpy(std::to_string(filesize).c_str())
+        fullbuffer[2] = std::to_string(filesize).c_str();
+         send(clientSocket,);
+        
+        fullbuffer[0] = 4;
+        while ((bytesRead = toSendFile.readsome(buffer, BUF)) > 0) {
+
+            bytesSent = send(clientSocket, fullbuffer, bytesRead, 0);
+            if (bytesSent == -1) {
+                break;
+            }
+            recv(clientSocket, &bytesReceived, sizeof (int32_t), 0);
+            if (bytesSent - bytesReceived != 0) {
+                toSendFile.close();
+                return;
+            }
+        }
+        fullbuffer[0] = (int32_t) 5;
+        send(clientSocket, fullbuffer, sizeof (int32_t), 0);
+        toSendFile.close();
+    }
+
+    void receiveFile(int filelength, std::string filename) {
+        std::ofstream receivedFile;
+        receivedFile.open(filename);
+
+        int bytesRead; // how many we have left to send
+        int bytesSent;
+        char fullbuffer[BUF + sizeof (int32_t)];
+        char* buffer = fullbuffer + sizeof (int32_t) / sizeof (char*);
+        fullbuffer[0] = (int32_t) 4;
+        int32_t bytesReceived;
+
+        while ((bytesRead = receivedFile.readsome(buffer, BUF)) > 0) {
+
+            bytesSent = send(clientSocket, fullbuffer, bytesRead, 0);
+            if (bytesSent == -1) {
+                break;
+            }
+            recv(clientSocket, &bytesReceived, sizeof (int32_t), 0);
+            if (bytesSent - bytesReceived != 0) {
+                receivedFile.close();
+                return;
+            }
+        }
+        fullbuffer[0] = (int32_t) 5;
+        send(clientSocket, fullbuffer, sizeof (int32_t), 0);
+        receivedFile.close();
+    }*/
+
 };
 
 #endif /* CLIENTDUMMY_H */
-

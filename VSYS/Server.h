@@ -1,10 +1,3 @@
-/* 
- * File:   Server.h
- * Author: link
- *
- * Created on October 1, 2016, 2:20 PM
- */
-
 #ifndef SERVER_H
 #define SERVER_H
 
@@ -20,63 +13,41 @@
 #include <cstring>
 #include <vector>
 #include <thread>
-#include "ClientDummy.h"
+#include <dirent.h>
+#include <errno.h>
 
+class ClientDummy;
 class Server {
 public:
 
-    Server(int port) {
-        this->port = port;
-    };
+    Server(int port, char* downloadFolder);
 
-    virtual ~Server() {
-    };
+    virtual ~Server();
 
-    int start() {
-        clientListenerSocket = socket(AF_INET, SOCK_STREAM, 0);
-        memset(&address, 0, sizeof (address));
-        address.sin_family = AF_INET;
-        address.sin_addr.s_addr = INADDR_ANY;
-        address.sin_port = htons(port);
+    int start();
 
-        if (bind(clientListenerSocket, (struct sockaddr *) &address, sizeof (address)) != 0) {
-            std::cerr << "bind error \n";
-            return EXIT_FAILURE;
-        }
+    void stop();
 
-        listen(clientListenerSocket, 5);
-        addressLength = sizeof (struct sockaddr_in);
+    void clearBuffer(char *buffer);
 
-        running = true;
-        waitForClient();
-        return EXIT_SUCCESS;
-    };
+    int getFileSize(std::string filename);
 
-    void stop() {
-        running = false;
-        close(clientListenerSocket);
-    };
-
+    void getFileListString(char* buffer);
+    
 private:
     bool running = false;
     int clientListenerSocket;
+    char * downloadFolder;
+
     socklen_t addressLength;
     int port;
     struct sockaddr_in address;
-    std::vector<ClientDummy> clientList;
+    std::vector<ClientDummy *> clientList;
 
-    void waitForClient() {
-        while (running) {
-            printf("Waiting for connections...\n");
+    void waitForClient();
 
-            struct sockaddr_in clientAddress;
-            int clientSocket = accept(clientListenerSocket, (struct sockaddr *) &clientAddress, &addressLength);
-            ClientDummy dummy(clientAddress, clientSocket);
-            clientList.push_back(dummy);
-            std::thread t(&ClientDummy::start, dummy);
-            dummy.start();
-        }
-    }
+    std::string getDir(std::string dir);
+
 };
 
 #endif /* SERVER_H */
