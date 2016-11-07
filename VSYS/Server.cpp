@@ -44,12 +44,12 @@ void Server::waitForClient() {
 
         std::cout << "Waiting for connections..." << std::endl;
 
-                struct sockaddr_in clientAddress;
-                int clientSocket = accept(clientListenerSocket, (struct sockaddr *) &clientAddress, &addressLength);
-                ClientDummy dummy(this, clientAddress, clientSocket);
-                clientList.push_back(&dummy);
-                //std::thread t(&ClientDummy::start, dummy);
-                dummy.start();
+        struct sockaddr_in clientAddress;
+        int clientSocket = accept(clientListenerSocket, (struct sockaddr *) &clientAddress, &addressLength);
+        ClientDummy dummy(this, clientAddress, clientSocket);
+        clientList.push_back(&dummy);
+        //std::thread t(&ClientDummy::start, dummy);
+        dummy.start();
     }
 }
 
@@ -71,9 +71,9 @@ bool Server::exists(const char *name) {
 
 int Server::getFileSize(std::string filename) {
     FILE *p_file = NULL;
-            p_file = fopen(filename.c_str(), "rb");
-            fseek(p_file, 0, SEEK_END);
-            int size = ftell(p_file);
-            fclose(p_file);
+    p_file = fopen(filename.c_str(), "rb");
+    fseek(p_file, 0, SEEK_END);
+    int size = ftell(p_file);
+    fclose(p_file);
     return size;
 }

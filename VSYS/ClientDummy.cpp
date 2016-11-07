@@ -41,9 +41,6 @@ int ClientDummy::start() {
             running = false;
             break;
         }
-        server->clearPacket(packet);
-        data[0] = 'a';
-        onGet();
         switch ((PACKET_TYPE) * header) {
             case REQ_LIST:
                 std::cout << clientSocket << ": " << "list" << std::endl;
@@ -102,9 +99,6 @@ void ClientDummy::onGet() {
     while (desiredFile.good()) {
         desiredFile.read(data, sizeof (char) * BUFFER_SIZE);
         sendFilePart(desiredFile.gcount());
-        for (int i = 0; i < BUFFER_SIZE; i++) {
-            std::cout << data[i];
-        }
         server->clearPacket(packet);
     }
 
@@ -113,7 +107,43 @@ void ClientDummy::onGet() {
 }
 
 void ClientDummy::onPut() {
+    std::string name(server->downloadFolder);
+    name += data;
+    server->clearPacket(packet);
 
+    int remainingFileSize = 0;
+    if (recv(clientSocket, packet, PACKET_SIZE, 0) == -1 || (*header) != RES_FILE_SIZE) {
+        std::cout << "Couldn't receive file \n";
+        return;
+    }
+    remainingFileSize = std::atoi(data);
+    server->clearPacket(packet);
+
+    if (server->exists(name.c_str())) {
+        std::remove(name.c_str());
+    }
+    std::ofstream outfile(name, std::ofstream::out | std::ofstream::binary | std::ofstream::app); //creates file
+    int receivedPacketSize = 0;
+
+    while (remainingFileSize > 0) {
+        if ((receivedPacketSize = recv(clientSocket, packet, PACKET_SIZE, 0)) == -1 || (*header) == FAILURE) {
+            std::cout << "A transmission error occured\n";
+            break;
+        }
+        if ((*header) == END) {
+            break;
+        }
+        outfile.write(data, receivedPacketSize - 1);
+        remainingFileSize -= receivedPacketSize - 1;
+    }
+    if (remainingFileSize != 0) {
+        std::cout << "File not sucessfully received\n";
+        std::remove(name.c_str());
+        sendFail();
+    } else {
+        std::cout << "Transmission successful :DDD\n";
+        sendEnd();
+    }
 }
 
 void ClientDummy::sendListPacket(std::string& filename, int filesize) {
