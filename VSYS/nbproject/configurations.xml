@@ -5,6 +5,7 @@
                    displayName="Header Files"
                    projectFiles="true">
       <itemPath>Client.h</itemPath>
+      <itemPath>Protocol.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
                    displayName="Resource Files"
@@ -37,10 +38,15 @@
         <rebuildPropChanged>false</rebuildPropChanged>
       </toolsSet>
       <compileType>
+        <ccTool>
+          <standard>8</standard>
+        </ccTool>
       </compileType>
       <item path="Client.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Client.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Protocol.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -68,6 +74,8 @@
       <item path="Client.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Client.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Protocol.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
       </item>

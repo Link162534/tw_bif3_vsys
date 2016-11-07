@@ -12,6 +12,7 @@
  */
 #ifndef CLIENT_H
 #define CLIENT_H
+#include "Protocol.h"
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -26,7 +27,7 @@
 #include <signal.h>
 #include <algorithm>
 #include <fstream>
-#define BUF 1024
+#include <list>
 
 class Client {
 public:
@@ -40,15 +41,21 @@ public:
     void onExit();
     void listenToInput();
 private:
+    char* flag = buffer;
+    char* message = buffer + 1;
     char* ip;
     int port;
     int socketID;
-    char buffer[BUF];
+    char buffer[BUFFER_SIZE+1];
     struct sockaddr_in address;
     int size;
     void list();
     void get(std::string name);
     void put(char * filename);//param?
+    struct listObject{std::string filename; int size; };
+    std::list<listObject> fileList;
+    char* getSecondStringFromArray(char * array);
+    void printFileList();
 };
 
 #endif /* CLIENT_H */

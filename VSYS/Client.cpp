@@ -12,7 +12,6 @@
  */
 
 #include "Client.h"
-using namespace std;
 
 Client::Client() {
 
@@ -49,19 +48,28 @@ void Client::printMenu() {
 }
 
 void Client::listenToInput() {
-    std::string input, param;
+    std::string input, command, param;
     while (1) {
         std::cin >> input;
-        for (int i = 0; i < input.size(); ++i) {
-            input[i] = tolower(input[i]);
+        if (input.find(" ") != -1) {
+            command = input.substr(0, input.find(" "));
+            param = input.substr(input.find(" "), input.length());
+        } else {
+            command = input;
         }
-        switch (input[0]) {
-            case 'l':;
-            case 'g':;
-            case 'p': ;
-            case 'q': return;
-            case 'h':;
-            default:;
+        for (int i = 0; i < command.size(); ++i) {
+            command[i] = tolower(command[i]);
+        }//zu ifs umbauen
+        if (command == "list") {
+            list();
+        } else if (command == "get") {
+            std::cout << "TEst GET" << std::endl;
+        } else if (command == "put") {
+
+        } else if (command == "quit") {
+            return;
+        } else {
+            std::cout << "Command not found, please enter again" << std::endl;
         }
 
     }
@@ -76,9 +84,43 @@ void Client::closeConnection() {
 void Client::get(std::string name) {
 
 }
+//char name[5] = "1234"; 
+//    std::string newNAme(name);
+//    int lol = std::stoi(newNAme);
+//    std::cout << lol;
 
 void Client::list() {
+    char reply[BUFFER_SIZE + 1];
+    buffer[0] = 1;
+    send(socketID, buffer, BUFFER_SIZE + 1, 0);
+    while (reply[0] != 4) {
+        if (recv(socketID, &reply, BUFFER_SIZE + 1, 0) == -1) {
+            std::cout << "An Error occured " << std::endl;
+        };
+        message = "123\0blablaname";
+        listObject temp;
+        temp.size = std::stoi(message);
+        temp.filename = getSecondStringFromArray(message);
+        fileList.push_back(temp);
+    }
+    printFileList();
+}
 
+char* Client::getSecondStringFromArray(char* array) {
+    char* secondString = array;
+    for (int i = 0; array[i] != '\0'; i++) {
+        secondString++;
+    }
+    secondString++;
+    return secondString;
+}
+
+void Client::printFileList() {
+    std::list<listObject>::iterator i;
+    std::cout << "Ordner enthaelt:" << std::endl;
+    for (i = fileList.begin(); i != fileList.end(); ++i) {
+        std::cout << (*i).filename << " " << (*i).size << " byte" << std::endl;
+    }
 }
 
 void Client::put(char * filename) {
@@ -87,13 +129,13 @@ void Client::put(char * filename) {
 
     int bytesRead; // how many we have left to send
     int bytesSent;
-    char fullbuffer[BUF + sizeof (int32_t)];
-    char* buffer = fullbuffer + sizeof (int32_t) / sizeof(char*);
-    fullbuffer[0] = (int32_t)4;
+    char fullbuffer[BUFFER_SIZE + sizeof (int32_t)];
+    char* buffer = fullbuffer + sizeof (int32_t) / sizeof (char*);
+    fullbuffer[0] = (int32_t) 4;
     int32_t bytesReceived;
 
-    while ((bytesRead = toBeSentFile.readsome(buffer, BUF)) > 0) {
-        
+    while ((bytesRead = toBeSentFile.readsome(buffer, BUFFER_SIZE)) > 0) {
+
         bytesSent = send(socketID, fullbuffer, bytesRead, 0);
         if (bytesSent == -1) {
             break;
@@ -104,8 +146,8 @@ void Client::put(char * filename) {
             return;
         }
     }
-    fullbuffer[0] = (int32_t)5;
-    send(socketID, fullbuffer, sizeof(int32_t), 0);
+    fullbuffer[0] = (int32_t) 5;
+    send(socketID, fullbuffer, sizeof (int32_t), 0);
     toBeSentFile.close();
 }
 
