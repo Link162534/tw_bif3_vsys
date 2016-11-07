@@ -1,51 +1,63 @@
+#include <algorithm>
+
 #include "ClientDummy.h"
 #include "Server.h"
 
-ClientDummy::ClientDummy(Server * server, struct sockaddr_in clientAddress, int clientSocket) {
+ClientDummy::ClientDummy(Server* server, struct sockaddr_in clientAddress, int clientSocket) {
     this->clientAddress = clientAddress;
     this->clientSocket = clientSocket;
     this->server = server;
+    packet = new char[PACKET_SIZE];
+    header = packet;
+    data = packet + 1;
+    server->clearPacket(packet);
 }
 
 ClientDummy::~ClientDummy() {
+    stop();
 }
 
 int ClientDummy::start() {
     running = true;
     if (clientSocket > 0) {
-        printf("Client connected from %s:%ho...\n", inet_ntoa(clientAddress.sin_addr), ntohs(clientAddress.sin_port));
-        strcpy(buffer, "Welcome to myserver, Please enter your command:\n");
-        send(clientSocket, buffer, strlen(buffer), 0);
+        std::cout << "Client connected from "
+                << inet_ntoa(clientAddress.sin_addr)
+                << ":"
+                << ntohs(clientAddress.sin_port)
+                << "..."
+                << std::endl;
+        sendMessage("Verbunden!\n");
     }
-    server->clearBuffer(buffer);
+
     while (running) {
-        size = recv(clientSocket, buffer, BUF - 1, 0);
+        server->clearPacket(packet);
+        size = recv(clientSocket, packet, PACKET_SIZE, 0);
         if (size == 0) {
-            printf("Client closed remote socket\n");
+            std::cout << "Client closed remote socket" << std::endl;
             running = false;
             break;
         } else if (size < 0) {
-            perror("Receive error, disconnected client.");
+            std::cerr << "Receive error, disconnected client.";
             running = false;
             break;
         }
-
-        if (buffer[0] == 1 || strncmp(buffer, "list", 4) == 0) {
-            printf("Client: list");
-            buffer[0] = 5;
-            //server->getFileListString(&buffer[1]);
-          //  send(clientSocket, buffer, BUF, 0);
+        server->clearPacket(packet);
+        data[0] = 'a';
+        onGet();
+        switch ((PACKET_TYPE) * header) {
+            case REQ_LIST:
+                std::cout << clientSocket << ": " << "list" << std::endl;
+                onList();
+                break;
+            case REQ_GET:
+                std::cout << clientSocket << ": " << "get" << std::endl;
+                onGet();
+                break;
+            case REQ_PUT:
+                std::cout << clientSocket << ": " << "put" << std::endl;
+                onPut();
+                break;
         }
-        if (buffer[0] == 2) {
-            //  receiveFile(std::atoi(&buffer[strlen(&buffer[2]) + 1]),
-            //          &buffer[2]);
-        }
-        if (buffer[0] == 3) {
-            //  sendFile(&buffer[2]);
-        }
-        if (strncmp(buffer, "quit", 4) == 0)
-            running = false;
-        server->clearBuffer(buffer);
     }
     close(clientSocket);
 }
@@ -55,66 +67,91 @@ int ClientDummy::stop() {
     close(clientSocket);
 }
 
+void ClientDummy::onList() {
+    using namespace std;
+    DIR *dp;
+    struct dirent *dirp;
 
-/*void sendFile(std::string filename) {
-    std::ifstream toSendFile;
-        
-    //FEHLER WENN FILE NICHT EXISITIERT
-    toSendFile.open(downloadFolder + filename);
-
-    int bytesRead; 
-    int bytesSent;
-    char fullbuffer[BUF + 1];
-    char* buffer = fullbuffer + 1;
-    int filesize = getFileSize(filename);
-    fullbuffer[0] = 2;
-    fullbuffer[1] = '\0';
-    strcpy(std::to_string(filesize).c_str())
-    fullbuffer[2] = std::to_string(filesize).c_str();
-     send(clientSocket,);
-        
-    fullbuffer[0] = 4;
-    while ((bytesRead = toSendFile.readsome(buffer, BUF)) > 0) {
-
-        bytesSent = send(clientSocket, fullbuffer, bytesRead, 0);
-        if (bytesSent == -1) {
-            break;
-        }
-        recv(clientSocket, &bytesReceived, sizeof (int32_t), 0);
-        if (bytesSent - bytesReceived != 0) {
-            toSendFile.close();
-            return;
-        }
+    if ((dp = opendir(server->downloadFolder)) == NULL) {
+        cerr << "Error(" << errno << ") opening " << server->downloadFolder << endl;
+        sendFail();
+        return;
     }
-    fullbuffer[0] = (int32_t) 5;
-    send(clientSocket, fullbuffer, sizeof (int32_t), 0);
-    toSendFile.close();
+    string folder(server->downloadFolder);
+    while ((dirp = readdir(dp)) != NULL) {
+        string name(dirp->d_name);
+        if (name == "." || name == "..")
+            continue;
+        sendListPacket(name, server->getFileSize(folder + name));
+    }
+    closedir(dp);
+    sendEnd();
 }
 
-void receiveFile(int filelength, std::string filename) {
-    std::ofstream receivedFile;
-    receivedFile.open(filename);
-
-    int bytesRead; // how many we have left to send
-    int bytesSent;
-    char fullbuffer[BUF + sizeof (int32_t)];
-    char* buffer = fullbuffer + sizeof (int32_t) / sizeof (char*);
-    fullbuffer[0] = (int32_t) 4;
-    int32_t bytesReceived;
-
-    while ((bytesRead = receivedFile.readsome(buffer, BUF)) > 0) {
-
-        bytesSent = send(clientSocket, fullbuffer, bytesRead, 0);
-        if (bytesSent == -1) {
-            break;
-        }
-        recv(clientSocket, &bytesReceived, sizeof (int32_t), 0);
-        if (bytesSent - bytesReceived != 0) {
-            receivedFile.close();
-            return;
-        }
+void ClientDummy::onGet() {
+    std::string file(server->downloadFolder);
+    file += data;
+    if (!server->exists((file).c_str())) {
+        sendFail();
     }
-    fullbuffer[0] = (int32_t) 5;
-    send(clientSocket, fullbuffer, sizeof (int32_t), 0);
-    receivedFile.close();
-}*/
+    int filesize = server->getFileSize(file);
+    sendFileSize(filesize);
+
+    std::ifstream desiredFile(file, std::ifstream::binary);
+
+    while (desiredFile.good()) {
+        desiredFile.read(data, sizeof (char) * BUFFER_SIZE);
+        sendFilePart(desiredFile.gcount());
+        for (int i = 0; i < BUFFER_SIZE; i++) {
+            std::cout << data[i];
+        }
+        server->clearPacket(packet);
+    }
+
+    desiredFile.close();
+    sendEnd();
+}
+
+void ClientDummy::onPut() {
+
+}
+
+void ClientDummy::sendListPacket(std::string& filename, int filesize) {
+    server->clearPacket(packet);
+    (*header) = RES_LIST_ANSWER;
+    std::string str = std::to_string(filesize) + '\0' + filename;
+    std::copy(str.begin(), str.end(), data);
+    send(clientSocket, packet, PACKET_SIZE, 0);
+}
+
+void ClientDummy::sendFileSize(int& filesize) {
+    server->clearPacket(packet);
+    (*header) = RES_FILE_SIZE;
+
+    std::string str = std::to_string(filesize) + '\0';
+    std::copy(str.begin(), str.end(), data);
+    send(clientSocket, packet, PACKET_SIZE, 0);
+}
+
+void ClientDummy::sendFilePart(int size) {
+    (*header) = RES_FILE_PART;
+    send(clientSocket, packet, size + 1, 0);
+}
+
+void ClientDummy::sendEnd() {
+    server->clearPacket(packet);
+    (*header) = END;
+    send(clientSocket, packet, 1, 0);
+}
+
+void ClientDummy::sendFail() {
+    server->clearPacket(packet);
+    (*header) = FAILURE;
+    send(clientSocket, packet, 1, 0);
+}
+
+void ClientDummy::sendMessage(char* message) {
+    strcpy(data, message);
+    (*header) = MESSAGE;
+    send(clientSocket, packet, PACKET_SIZE, 0);
+}

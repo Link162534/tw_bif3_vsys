@@ -7,14 +7,13 @@
 #include <cstdio>
 #include <fstream>
 #include <arpa/inet.h>
-#define BUF 1024
-
+#include "Protocol.h"
 
 class Server;
 class ClientDummy {
 public:
 
-    ClientDummy(Server * server, struct sockaddr_in clientAddress, int clientSocket);
+    ClientDummy(Server* server, struct sockaddr_in clientAddress, int clientSocket);
 
     virtual ~ClientDummy();
     
@@ -26,11 +25,23 @@ private:
     bool running = false;
     int clientSocket;
     int size;
-    char buffer[BUF];
-    char * downloadFolder;
+    char* packet;
+    char* header;
+    char* data;
+    char* downloadFolder;
     struct sockaddr_in clientAddress;
-    Server * server;
-
+    Server* server;
+    
+    void onList();
+    void onGet();
+    void onPut();
+    void sendListPacket(std::string &filename, int filesize);
+    void sendFileSize(int &filesize);
+    void sendFilePart(int size);
+    void sendEnd();
+    void sendFail();
+    void sendMessage(char *message);
+    
     /*void sendFile(std::string filename) {
         std::ifstream toSendFile;
         

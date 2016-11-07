@@ -16,7 +16,10 @@
 #include <dirent.h>
 #include <errno.h>
 
+#include "Protocol.h"
+
 class ClientDummy;
+
 class Server {
 public:
 
@@ -25,27 +28,23 @@ public:
     virtual ~Server();
 
     int start();
-
     void stop();
 
-    void clearBuffer(char *buffer);
-
+    void clearPacket(char* packet);
     int getFileSize(std::string filename);
+    bool exists(const char *name);
+    char * downloadFolder;
 
-    void getFileListString(char* buffer);
-    
+
 private:
     bool running = false;
     int clientListenerSocket;
-    char * downloadFolder;
-
     socklen_t addressLength;
     int port;
     struct sockaddr_in address;
     std::vector<ClientDummy *> clientList;
 
     void waitForClient();
-
     std::string getDir(std::string dir);
 
 };

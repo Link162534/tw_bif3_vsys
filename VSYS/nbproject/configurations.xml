@@ -5,6 +5,7 @@
                    displayName="Header Files"
                    projectFiles="true">
       <itemPath>ClientDummy.h</itemPath>
+      <itemPath>Protocol.h</itemPath>
       <itemPath>Server.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
@@ -52,6 +53,8 @@
       </item>
       <item path="ClientDummy.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="Protocol.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="Server.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Server.h" ex="false" tool="3" flavor2="0">
@@ -84,6 +87,8 @@
       <item path="ClientDummy.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="ClientDummy.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Protocol.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Server.cpp" ex="false" tool="1" flavor2="0">
       </item>
