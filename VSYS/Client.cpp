@@ -59,7 +59,7 @@ int Client::requestLogin() {
         buffer[0] = LOGIN;
         send(socketID, buffer, BUFFER_SIZE + 1, 0);
         if (recv(socketID, &reply, BUFFER_SIZE + 1, 0) == -1) {
-            std::cout << "An Error occured \n";
+            std::cout << "Connection failed \n";
             return -1;
         }
         if (reply[0] == RES_FAILURE) {
@@ -87,15 +87,7 @@ void Client::listenToInput() {
         std::cout << "Enter command: \n";
         std::cin.clear();
         std::cin >> command;
-        //        if (input.find(" ") > -1) {
-        //             std::cout << "lol: \n";
-        //            command = input.substr(0, input.find(" "));
-        //            std::cout << "command. "<<command;
-        //            param = input.substr(input.find(" "), input.length());
-        //            std::cout << "param. "<<param;
-        //        } else {
-        //            command = input;
-        //        }
+
         for (int i = 0; i < command.size(); ++i) {
             command[i] = tolower(command[i]);
         }
@@ -106,7 +98,7 @@ void Client::listenToInput() {
             get(param);
         } else if (command == "put") {
             std::cin >> param;
-            get(param);
+            put(param);
         } else if (command == "quit") {
             return;
         } else {
@@ -149,7 +141,7 @@ void Client::get(std::string name) {
     remainingFileSize = std::atoi((reply + 1)); //
 
     clearArray(reply, BUFFER_SIZE); //clear reply for next recv
-    
+
     if (fileExists(name.c_str())) {//removes file if exists
         std::remove(name.c_str());
     }
@@ -174,6 +166,7 @@ void Client::get(std::string name) {
     }
     if (remainingFileSize != 0) {//if file transfere failed, delete file
         std::remove(name.c_str());
+        std::cout << "A transmission error occured\n";
     } else {
         std::cout << "Transmission successful :D \n";
     }
@@ -189,7 +182,7 @@ void Client::list() {
 
     while (1) {
         if (recv(socketID, &reply, BUFFER_SIZE + 1, 0) == -1) {
-            std::cout << "An Error occured \n";
+            std::cout << "Connection failed \n";
             return;
         }
         //testing purposes
@@ -240,40 +233,70 @@ char* Client::getSecondStringFromArray(char* array) {
 
 void Client::printFileList() {
     std::list<listObject>::iterator i;
-    std::cout << "Ordner enthaelt: \n";
+    std::cout << "Directory contains: \n";
     for (i = fileList.begin(); i != fileList.end(); ++i) {
         std::cout << (*i).filename << " " << (*i).size << " byte\n";
     }
 }
 
-void Client::put(char * filename) {
-    //    std::ifstream toBeSentFile;
-    //    toBeSentFile.open(filename);
-    //
-    //    int bytesRead; // how many we have left to send
-    //    int bytesSent;
-    //    char fullbuffer[BUFFER_SIZE + sizeof (int32_t)];
-    //    char* buffer = fullbuffer + sizeof (int32_t) / sizeof (char*);
-    //    fullbuffer[0] = (int32_t) 4;
-    //    int32_t bytesReceived;
-    //
-    //    while ((bytesRead = toBeSentFile.readsome(buffer, BUFFER_SIZE)) > 0) {
-    //
-    //        bytesSent = send(socketID, fullbuffer, bytesRead, 0);
-    //        if (bytesSent == -1) {
-    //            break;
-    //        }
-    //        recv(socketID, &bytesReceived, sizeof (int32_t), 0);
-    //        if (bytesSent - bytesReceived != 0) {
-    //            toBeSentFile.close();
-    //            return;
-    //        }
-    //    }
-    //    fullbuffer[0] = (int32_t) 5;
-    //    send(socketID, fullbuffer, sizeof (int32_t), 0);
-    //    toBeSentFile.close();
+void Client::put(std::string name) {
+    if (fileExists(name.c_str()) == false) {
+        std::cout << "The file does not exist\n";
+        return;
+    }
+    buffer[0] = REQ_PUT; //set flag to put
+    std::copy(name.begin(), name.end(), message); //write filename into messagepart of buffer
+    send(socketID, buffer, BUFFER_SIZE + 1, 0); //sends get request
+    clearArray(buffer, BUFFER_SIZE);
+    int filesize = getFileSize(name);
+    sendFileSize(filesize);
+    clearArray(message, BUFFER_SIZE);
+    std::ifstream desiredFile(name, std::ifstream::binary);
+
+    while (desiredFile.good()) {
+        desiredFile.read(message, sizeof (char) * BUFFER_SIZE);
+        sendFilePart(desiredFile.gcount());
+        //        for (int i = 0; i < BUFFER_SIZE; i++) {
+        //            std::cout << message[i];
+        //        }
+        clearArray(buffer, BUFFER_SIZE);
+    }
+    desiredFile.close();
+    clearArray(buffer, BUFFER_SIZE);
+    buffer[0] = RES_END; //end transmission
+    send(socketID, buffer, BUFFER_SIZE + 1, 0);
+    char reply[BUFFER_SIZE + 1];
+    if (recv(socketID, &reply, BUFFER_SIZE + 1, 0) == -1) {
+        std::cout << "There could have been problems with the upload \n";
+        return;
+    }
+    if (reply[0] == RES_END) {
+        std::cout << "Upload successfull \n";
+    }
 }
 
+void Client::sendFileSize(int& filesize) {
+    clearArray(buffer, BUFFER_SIZE);
+    (*flag) = RES_FILE_SIZE;
+
+    std::string str = std::to_string(filesize) + '\0';
+    std::copy(str.begin(), str.end(), message);
+    send(socketID, buffer, BUFFER_SIZE + 1, 0);
+}
+
+void Client::sendFilePart(int size) {
+    (*flag) = RES_FILE_PART;
+    send(socketID, buffer, size + 1, 0);
+}
+
+int Client::getFileSize(std::string filename) {
+    FILE *p_file = NULL;
+    p_file = fopen(filename.c_str(), "rb");
+    fseek(p_file, 0, SEEK_END);
+    int size = ftell(p_file);
+    fclose(p_file);
+    return size;
+}
 
 
 
