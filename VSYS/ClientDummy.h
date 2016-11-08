@@ -35,8 +35,8 @@ private:
     void onList();
     void onGet();
     void onPut();
-    void sendListPacket(std::string &filename, int filesize);
-    void sendFileSize(int &filesize);
+    void sendListPacket(std::string &filename, long filesize);
+    void sendFileSize(long &filesize);
     void sendFilePart(int size);
     void sendEnd();
     void sendFail();

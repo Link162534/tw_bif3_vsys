@@ -31,7 +31,7 @@ public:
     void stop();
 
     void clearPacket(char* packet);
-    int getFileSize(std::string filename);
+    long getFileSize(std::string filename);
     bool exists(const char *name);
     char * downloadFolder;
     std::vector<pthread_t *> threadList;

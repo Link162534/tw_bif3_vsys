@@ -92,7 +92,7 @@ void ClientDummy::onGet() {
     if (!server->exists((file).c_str())) {
         sendFail();
     }
-    int filesize = server->getFileSize(file);
+    long filesize = server->getFileSize(file);
     sendFileSize(filesize);
 
     std::ifstream desiredFile(file, std::ifstream::binary);
@@ -112,12 +112,12 @@ void ClientDummy::onPut() {
     name += data;
     server->clearPacket(packet);
 
-    int remainingFileSize = 0;
+    long remainingFileSize = 0;
     if (recv(clientSocket, packet, PACKET_SIZE, 0) == -1 || (*header) != RES_FILE_SIZE) {
         std::cout << clientSocket << ": " <<  "Couldn't receive file \n";
         return;
     }
-    remainingFileSize = std::atoi(data);
+    remainingFileSize = std::atol(data);
     server->clearPacket(packet);
 
     if (server->exists(name.c_str())) {
@@ -149,7 +149,7 @@ void ClientDummy::onPut() {
     }
 }
 
-void ClientDummy::sendListPacket(std::string& filename, int filesize) {
+void ClientDummy::sendListPacket(std::string& filename, long filesize) {
     server->clearPacket(packet);
     (*header) = RES_LIST_ANSWER;
     std::string str = std::to_string(filesize) + '\0' + filename;
@@ -157,7 +157,7 @@ void ClientDummy::sendListPacket(std::string& filename, int filesize) {
     send(clientSocket, packet, PACKET_SIZE, 0);
 }
 
-void ClientDummy::sendFileSize(int& filesize) {
+void ClientDummy::sendFileSize(long& filesize) {
     server->clearPacket(packet);
     (*header) = RES_FILE_SIZE;
 

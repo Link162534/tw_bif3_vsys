@@ -11,7 +11,8 @@ enum PACKET_TYPE {
     MESSAGE = 0, 
     REQ_LIST = 1, REQ_GET = 2, REQ_PUT = 3, 
     END = 4, FAILURE = 5, 
-    RES_FILE_PART = 6, RES_FILE_SIZE = 7, RES_LIST_ANSWER = 8           
+    RES_FILE_PART = 6, RES_FILE_SIZE = 7, RES_LIST_ANSWER = 8,
+    LOGIN = 9, BANNED = 10         
 };
 
 #endif /* PROTOCOL_H */

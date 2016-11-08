@@ -76,11 +76,11 @@ bool Server::exists(const char *name) {
     return false;
 }
 
-int Server::getFileSize(std::string filename) {
+long Server::getFileSize(std::string filename) {
     FILE *p_file = NULL;
     p_file = fopen(filename.c_str(), "rb");
     fseek(p_file, 0, SEEK_END);
-    int size = ftell(p_file);
+    long size = ftell(p_file);
     fclose(p_file);
     return size;
 }
