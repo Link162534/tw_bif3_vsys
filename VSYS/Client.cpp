@@ -84,7 +84,7 @@ void Client::printMenu() {
 void Client::listenToInput() {
     std::string command, param;
     while (1) {
-        std::cout << "Enter command: \n";
+        std::cout << "\nEnter command: \n";
         std::cin.clear();
         std::cin >> command;
 
