@@ -149,8 +149,7 @@ void Client::get(std::string name) {
     int receivedPacketSize = 0;
 
     while (remainingFileSize > 0) {//while received files aren'T equal to filesize, subtracts received filesize from remaining filesize at end of while
-
-        if ((receivedPacketSize = recv(socketID, &reply, BUFFER_SIZE + 1, 0)) == -1 || reply[0] == RES_FAILURE) {//receive filepart and checks for error
+        if ((receivedPacketSize = recv(socketID, reply, BUFFER_SIZE + 1, 0)) == -1 || reply[0] == RES_FAILURE) {//receive filepart and checks for error
             std::cout << "A transmission error occured\n";
             break;
         }
@@ -160,9 +159,12 @@ void Client::get(std::string name) {
         if (reply[0] == RES_END) {//breaks if server sends that transmission is finished
             break;
         }
+
+        if (receivedPacketSize < BUFFER_SIZE + 1)// removes last byte of the last packet
+            receivedPacketSize--;
+
         outfile.write(reply + 1, receivedPacketSize - 1);
         remainingFileSize -= receivedPacketSize - 1;
-
     }
     if (remainingFileSize != 0) {//if file transfere failed, delete file
         std::remove(name.c_str());
@@ -246,7 +248,7 @@ void Client::put(std::string name) {
     }
     buffer[0] = REQ_PUT; //set flag to put
     std::copy(name.begin(), name.end(), message); //write filename into messagepart of buffer
-    send(socketID, buffer, BUFFER_SIZE + 1, 0); //sends get request
+    send(socketID, buffer, BUFFER_SIZE + 1, 0); //sends put request
     clearArray(buffer, BUFFER_SIZE);
     int filesize = getFileSize(name);
     sendFileSize(filesize);
@@ -264,14 +266,16 @@ void Client::put(std::string name) {
     desiredFile.close();
     clearArray(buffer, BUFFER_SIZE);
     buffer[0] = RES_END; //end transmission
-    send(socketID, buffer, BUFFER_SIZE + 1, 0);
+    send(socketID, buffer, 1, 0);
     char reply[BUFFER_SIZE + 1];
     if (recv(socketID, &reply, BUFFER_SIZE + 1, 0) == -1) {
         std::cout << "There could have been problems with the upload \n";
         return;
     }
     if (reply[0] == RES_END) {
-        std::cout << "Upload successfull \n";
+        std::cout << "Upload successful \n";
+    } else {
+        std::cout << "Upload failed \n";
     }
 }
 
