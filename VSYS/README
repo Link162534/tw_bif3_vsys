@@ -1,13 +1,37 @@
 Das Protokoll funktioniert folgendermaßen:
 Die Packetflags sind:
-0 Message
-1 List
-2 Get
-3 Put
-4 End
-5 Fail
-6 Filepart
-7 Filesize
-8 Listpart
-9 Login
-10 Banned
+0 MESSAGE: Markiert Pakete, die eine Textnachricht beinhalten
+1 REQ_LIST: Markiert eine List-Request vom Client
+2 REQ_GET: Markiert eine Get-Request vom Client
+3 REQ_PUT: Markiert eine Put-Request vom Client
+4 END: Entspricht einem "OK, fertig"
+5 FAILURE: Wird im Falle eines Fehlers gesendet
+6 RES_FILE_PART: Pakete mit diesem Flag beinhalten Teile eines Files
+7 RES_FILE_SIZE: Pakete mit diesem Flag beinhalten die Größe eines Files
+8 RES_LIST_ANSWER: Pakete mit diesem Flag beinhalten Größe und Namen eines Files, getrennt durch ein '\0'.
+9 LOGIN
+10 BANNED 
+
+
+Ein Paket ist 1025 Bytes lang und setzt sich aus 1 Byte Flag/Header und 1024 Byte Message/Data zusammen. Das Flag sagt dem Empfänger, wie mit der Message umzugehen ist. Außerdem limitiert das Flag die möglichen korrekten Antwortflags.
+
+List:
+Client sendet REQ_LIST[]
+Server sendet FAILURE[] wenn Ordner nicht vorhanden, ansonsten
+Server sendet RES_LIST_ANSWER[filesize, filename] für jedes File
+Server sendet END[] um Vorgang zu beenden.
+
+Get:
+Client sendet REQ_GET[filename]
+Server sendet FAILURE[] wenn File nicht vorhanden, ansonsten
+Server sendet RES_FILE_SIZE[filesize]
+Server sendet RES_FILE_PART[filedata] bis gesamtes File übertragen wurde
+Server sendet END[]
+
+Put:
+Client sendet REQ_PUT[filename]
+Client sendet RES_FILE_SIZE[filesize]
+Client sendet RES_FILE_PART[filedata] bis gesamtes File übertragen wurde
+Client sendet END[]
+Server sendet FAILURE[] wenn File nicht korrekt empfangen, ansonsten
+Server sendet End[]

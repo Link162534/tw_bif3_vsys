@@ -147,7 +147,7 @@ void Client::get(std::string name) {
     }
     std::ofstream outfile(name, std::ofstream::out | std::ofstream::binary | std::ofstream::app); //creates file
     int receivedPacketSize = 0;
-
+    long totalFileSize = remainingFileSize;
     while (remainingFileSize > 0) {//while received files aren'T equal to filesize, subtracts received filesize from remaining filesize at end of while
         if ((receivedPacketSize = recv(socketID, reply, BUFFER_SIZE + 1, 0)) == -1 || reply[0] == FAILURE) {//receive filepart and checks for error
             std::cout << "A transmission error occured\n";
@@ -165,6 +165,7 @@ void Client::get(std::string name) {
 
         outfile.write(reply + 1, receivedPacketSize - 1);
         remainingFileSize -= receivedPacketSize - 1;
+        std::cout << (((totalFileSize - remainingFileSize)*100.0) / totalFileSize) << "%\n";
     }
     if (remainingFileSize != 0) {//if file transfere failed, delete file
         std::remove(name.c_str());
