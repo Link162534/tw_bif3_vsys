@@ -1,9 +1,12 @@
 #include "ClientDummy.h"
 #include "Server.h"
 
+Server* gs;
+
 Server::Server(int port, char* downloadFolder) {
     this->port = port;
     this->downloadFolder = downloadFolder;
+    gs = this;
 };
 
 Server::~Server() {
@@ -39,22 +42,27 @@ void Server::stop() {
     }
 };
 
+void* testThread(void *arg) {
+    //pthread_detach(pthread_self());
+    gs->clientList.back()->start();
+}
+
 void Server::waitForClient() {
+    std::cout << "Waiting for connections..." << std::endl;
     while (running) {
-
-        std::cout << "Waiting for connections..." << std::endl;
-
         struct sockaddr_in clientAddress;
         int clientSocket = accept(clientListenerSocket, (struct sockaddr *) &clientAddress, &addressLength);
-        ClientDummy dummy(this, clientAddress, clientSocket);
-        clientList.push_back(&dummy);
+        clientList.push_back(new ClientDummy(this, clientAddress, clientSocket));
         //std::thread t(&ClientDummy::start, dummy);
-        dummy.start();
+        pthread_t* thread = new pthread_t;
+        threadList.push_back(thread);
+        pthread_create(thread, NULL, testThread, NULL);
     }
 }
 
 void Server::clearPacket(char *packet) {
     for (int i = 0; i < PACKET_SIZE; i++) {
+
         packet[i] = '\0';
     }
 }

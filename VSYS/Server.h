@@ -34,6 +34,8 @@ public:
     int getFileSize(std::string filename);
     bool exists(const char *name);
     char * downloadFolder;
+    std::vector<pthread_t *> threadList;
+    std::vector<ClientDummy *> clientList;
 
 
 private:
@@ -42,7 +44,6 @@ private:
     socklen_t addressLength;
     int port;
     struct sockaddr_in address;
-    std::vector<ClientDummy *> clientList;
 
     void waitForClient();
     std::string getDir(std::string dir);

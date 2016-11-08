@@ -20,7 +20,7 @@ ClientDummy::~ClientDummy() {
 int ClientDummy::start() {
     running = true;
     if (clientSocket > 0) {
-        std::cout << "Client connected from "
+        std::cout << clientSocket << ": " <<  "Client connected from "
                 << inet_ntoa(clientAddress.sin_addr)
                 << ":"
                 << ntohs(clientAddress.sin_port)
@@ -32,26 +32,27 @@ int ClientDummy::start() {
     while (running) {
         server->clearPacket(packet);
         size = recv(clientSocket, packet, PACKET_SIZE, 0);
+
         if (size == 0) {
-            std::cout << "Client closed remote socket" << std::endl;
+            std::cout << clientSocket <<": closed connection." << std::endl;
             running = false;
             break;
         } else if (size < 0) {
-            std::cerr << "Receive error, disconnected client.";
+            std::cerr << clientSocket <<": crashed, connection closed.";
             running = false;
             break;
         }
         switch ((PACKET_TYPE) * header) {
             case REQ_LIST:
-                std::cout << clientSocket << ": " << "list" << std::endl;
+                std::cout << clientSocket << ": " << "requested list." << std::endl;
                 onList();
                 break;
             case REQ_GET:
-                std::cout << clientSocket << ": " << "get" << std::endl;
+                std::cout << clientSocket << ": " << "requested get." << std::endl;
                 onGet();
                 break;
             case REQ_PUT:
-                std::cout << clientSocket << ": " << "put" << std::endl;
+                std::cout << clientSocket << ": " << "requested put." << std::endl;
                 onPut();
                 break;
         }
@@ -70,7 +71,7 @@ void ClientDummy::onList() {
     struct dirent *dirp;
 
     if ((dp = opendir(server->downloadFolder)) == NULL) {
-        cerr << "Error(" << errno << ") opening " << server->downloadFolder << endl;
+        cerr << clientSocket << ": " <<  "Error(" << errno << ") opening " << server->downloadFolder << endl;
         sendFail();
         return;
     }
@@ -113,7 +114,7 @@ void ClientDummy::onPut() {
 
     int remainingFileSize = 0;
     if (recv(clientSocket, packet, PACKET_SIZE, 0) == -1 || (*header) != RES_FILE_SIZE) {
-        std::cout << "Couldn't receive file \n";
+        std::cout << clientSocket << ": " <<  "Couldn't receive file \n";
         return;
     }
     remainingFileSize = std::atoi(data);
@@ -127,7 +128,7 @@ void ClientDummy::onPut() {
 
     while (remainingFileSize > 0) {
         if ((receivedPacketSize = recv(clientSocket, packet, PACKET_SIZE, 0)) == -1 || (*header) == FAILURE) {
-            std::cout << "A transmission error occured\n";
+            std::cout << clientSocket << ": " <<  "A transmission error occured\n";
             break;
         }
         if ((*header) == END) {
@@ -139,11 +140,11 @@ void ClientDummy::onPut() {
         remainingFileSize -= receivedPacketSize - 1;
     }
     if (remainingFileSize != 0) {
-        std::cout << "File not sucessfully received\n";
+        std::cout << clientSocket << ": " <<  "File not sucessfully received\n";
         std::remove(name.c_str());
         sendFail();
     } else {
-        std::cout << "Transmission successful\n";
+        std::cout << clientSocket << ": " <<  "Transmission successful\n";
         sendEnd();
     }
 }
