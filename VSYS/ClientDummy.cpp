@@ -26,7 +26,7 @@ int ClientDummy::start() {
                 << ntohs(clientAddress.sin_port)
                 << "..."
                 << std::endl;
-        sendMessage("Verbunden!\n");
+        sendMessage("Connected!\n");
     }
 
     while (running) {
@@ -97,7 +97,7 @@ void ClientDummy::onGet() {
     std::ifstream desiredFile(file, std::ifstream::binary);
 
     while (desiredFile.good()) {
-        desiredFile.read(data, sizeof (char) * BUFFER_SIZE);
+        desiredFile.read(data, BUFFER_SIZE);
         sendFilePart(desiredFile.gcount());
         server->clearPacket(packet);
     }
@@ -133,6 +133,8 @@ void ClientDummy::onPut() {
         if ((*header) == END) {
             break;
         }
+        if (receivedPacketSize < PACKET_SIZE)// removes last byte of the last packet
+            receivedPacketSize--;
         outfile.write(data, receivedPacketSize - 1);
         remainingFileSize -= receivedPacketSize - 1;
     }
@@ -141,7 +143,7 @@ void ClientDummy::onPut() {
         std::remove(name.c_str());
         sendFail();
     } else {
-        std::cout << "Transmission successful :DDD\n";
+        std::cout << "Transmission successful\n";
         sendEnd();
     }
 }

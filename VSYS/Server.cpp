@@ -55,7 +55,6 @@ void Server::waitForClient() {
 
 void Server::clearPacket(char *packet) {
     for (int i = 0; i < PACKET_SIZE; i++) {
-
         packet[i] = '\0';
     }
 }
