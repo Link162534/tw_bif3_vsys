@@ -1,0 +1,13 @@
+Das Protokoll funktioniert folgendermaßen:
+Die Packetflags sind:
+0 Message
+1 List
+2 Get
+3 Put
+4 End
+5 Fail
+6 Filepart
+7 Filesize
+8 Listpart
+9 Login
+10 Banned

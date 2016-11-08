@@ -4,9 +4,15 @@
 #define DEFAULT_PORT 7777
 #define LOCALHOST "127.0.0.1"
 #define BUFFER_SIZE 1024
+#define PACKET_SIZE BUFFER_SIZE + 1
+#define DEFAULT_FOLDER "./downloads/"
 
-enum PACKAGE_TYPE {
-    REQ_LIST = 1, REQ_GET = 2, REQ_PUT = 3, RES_END = 4, RES_FAILURE = 5, RES_FILE_PART = 6, RES_FILE_SIZE = 7, RES_LIST_ANSWER = 8, LOGIN = 9, RES_3_TIMES_WRONG = 10
+enum PACKET_TYPE {
+    MESSAGE = 0, 
+    REQ_LIST = 1, REQ_GET = 2, REQ_PUT = 3, 
+    END = 4, FAILURE = 5, 
+    RES_FILE_PART = 6, RES_FILE_SIZE = 7, RES_LIST_ANSWER = 8,
+    LOGIN = 9, BANNED = 10         
 };
 
-#endif / PROTOCOL_H */
+#endif /* PROTOCOL_H */

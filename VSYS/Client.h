@@ -68,9 +68,9 @@ private:
     void clearArray(char array[], int size);
     std::string usingMessage;
     bool fileExists(const char* name);
-    void sendFileSize(int& filesize);
+    void sendFileSize(long& filesize);
     void sendFilePart(int size);
-    int getFileSize(std::string filename);
+    long getFileSize(std::string filename);
 };
 
 #endif /* CLIENT_H */
